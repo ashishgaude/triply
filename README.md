@@ -24,7 +24,20 @@ http://localhost:5173/?mode=reset-password
 
 Also add the actual production app URL and its `?mode=reset-password` variant, including any deployment base path. Confirmation and password-reset links must return to Triply, not expense-tracker. Keep email confirmation enabled for production. PKCE confirmation/recovery links should be opened in the browser that requested them.
 
-## Run
+## GitHub Pages Deployment
+
+The [deployment workflow](.github/workflows/deploy-pages.yml) runs on pushes to `main` or manually from the Actions tab. It installs dependencies with `npm ci`, runs tests and lint on Node 24, builds the PWA using GitHub Pages' base path, and deploys the `dist` artifact. Deployments do not modify the database.
+
+Repository setup for `ashishgaude/triply`:
+
+1. In **Settings > Pages**, set **Source** to **GitHub Actions**.
+2. In **Settings > Secrets and variables > Actions**, add repository secrets named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, using the same public Supabase configuration as the local app. Never use a service-role/secret server key; `VITE_` values are embedded in the public bundle.
+3. Push the workflow and app to `main`, or run **Deploy Triply to GitHub Pages** manually after the workflow is pushed.
+4. In Supabase Authentication's redirect allowlist, add `https://ashishgaude.github.io/triply/` and `https://ashishgaude.github.io/triply/?mode=reset-password`.
+
+The expected deployment URL is `https://ashishgaude.github.io/triply/`. Production PWA installation requires HTTPS, which GitHub Pages provides. Auth and database setup from the sections below remain required. To verify repository-path assets locally, use `npm run build -- --base /triply/`.
+
+## Local Development
 
 ```sh
 npm install

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   balances,
   membersFromUsers,
+  normalizeTripIcon,
   replaceTrip,
   withoutSampleTrips,
   settlements,
@@ -44,6 +45,13 @@ test("equal splits preserve every cent, including amounts smaller than the group
   assert.deepEqual(splitCents(2, 4), [1, 1, 0, 0]);
   assert.throws(() => splitCents(0, 4));
   assert.throws(() => splitCents(100, 0));
+});
+
+test("trip icons default safely for older trips and preserve recognized choices", () => {
+  assert.equal(normalizeTripIcon(undefined), "plane");
+  assert.equal(normalizeTripIcon("unknown"), "plane");
+  assert.equal(normalizeTripIcon("beach"), "beach");
+  assert.equal(normalizeTripIcon("mountain"), "mountain");
 });
 
 test("balances sum to zero and proposed repayments settle everyone", () => {

@@ -36,10 +36,12 @@ import {
   withoutSampleTrips,
   settlements,
   splitCents,
+  normalizeTripIcon,
 } from "./ledger";
 import type { Expense, Member, Transfer, Trip, Workspace } from "./ledger";
 import { accountStorageKey } from "./auth-utils";
 import UserPicker from "./UserPicker";
+import TripIcon, { TripIconPicker } from "./TripIcon";
 import { fetchWorkspace, persistTrip } from "./trip-store";
 import "./App.css";
 
@@ -473,6 +475,7 @@ function App({
     const data = new FormData(event.currentTarget);
     const name = String(data.get("name")).trim();
     const destination = String(data.get("destination")).trim();
+    const icon = normalizeTripIcon(data.get("icon"));
     if (!name) {
       setFormError("Give your trip a name.");
       return;
@@ -485,6 +488,7 @@ function App({
       const newTrip: Trip = {
         id: (newTripId.current ||= crypto.randomUUID()),
         name,
+        icon,
         destination,
         currency: String(data.get("currency")),
         sample: false,
@@ -498,7 +502,10 @@ function App({
       setTab("Expenses");
       setQuery("");
       setFilter("All categories");
-    } else if (trip && !(await updateTrip({ ...trip, name, destination })))
+    } else if (
+      trip &&
+      !(await updateTrip({ ...trip, name, icon, destination }))
+    )
       return;
     setTripModal(null);
     setSelectedTravelers([]);
@@ -596,7 +603,7 @@ function App({
               }
               onClick={() => selectTrip(item.id)}
             >
-              <span className="trip-dot" />
+              <TripIcon icon={item.icon} size={16} />
               <span>{item.name}</span>
             </button>
           ))}
@@ -631,6 +638,7 @@ function App({
             <span className="breadcrumb-label">My trips</span>
             <span>/</span>
             <div className="trip-selector">
+              {trip && <TripIcon icon={trip.icon} size={17} />}
               <select
                 aria-label="Select trip"
                 value={workspace.selectedTripId}
@@ -730,7 +738,10 @@ function App({
                   <div className="eyebrow">
                     GOOD COMPANY. SHARED ADVENTURES.
                   </div>
-                  <h1>{trip.name}</h1>
+                  <div className="trip-heading">
+                    <TripIcon icon={trip.icon} size={26} />
+                    <h1>{trip.name}</h1>
+                  </div>
                   <div className="trip-meta">
                     <span>
                       <MapPin size={15} />
@@ -1401,6 +1412,10 @@ function App({
           }}
         >
           <form className="modal-form" onSubmit={saveTrip}>
+            <TripIconPicker
+              defaultValue={tripModal === "edit" ? trip?.icon : "plane"}
+              disabled={saving}
+            />
             <label>
               Trip name
               <input

@@ -62,12 +62,31 @@ test("trip storage is transactional, versioned, and limited to owners and member
       `set role authenticated; set request.jwt.claim.sub = '${owner}'`,
     );
     await save(trip, null);
+    await db.exec("reset role");
+    const iconMigration = await readFile(
+      new URL(
+        "../supabase/migrations/2026-10-03-trip-icons.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    await db.exec(iconMigration);
+    await db.exec(iconMigration);
+    assert.equal(
+      (await db.query<{ icon: string }>("select icon from triply.trips"))
+        .rows[0].icon,
+      "plane",
+    );
+    await db.exec(
+      `set role authenticated; set request.jwt.claim.sub = '${owner}'`,
+    );
     const loaded = await db.query<{
       result: {
         trips: {
           id: string;
           ownerId: string;
           version: number;
+          icon: string;
           members: { id: string; name: string }[];
           expenses: { amount: number; participants: string[] }[];
         }[];
@@ -76,6 +95,7 @@ test("trip storage is transactional, versioned, and limited to owners and member
     assert.equal(loaded.rows[0].result.trips[0].id, tripId);
     assert.equal(loaded.rows[0].result.trips[0].ownerId, owner);
     assert.equal(loaded.rows[0].result.trips[0].version, 1);
+    assert.equal(loaded.rows[0].result.trips[0].icon, "plane");
     assert.equal(loaded.rows[0].result.trips[0].members[0].name, "owner");
     assert.equal(loaded.rows[0].result.trips[0].expenses[0].amount, 101);
     assert.deepEqual(loaded.rows[0].result.trips[0].expenses[0].participants, [
@@ -120,6 +140,10 @@ test("trip storage is transactional, versioned, and limited to owners and member
     assert.equal((await db.query("select * from triply.trips")).rows.length, 1);
     await assert.rejects(
       save({ ...trip, name: "Hijacked" }, 1),
+      /Only the trip owner/,
+    );
+    await assert.rejects(
+      save({ ...trip, icon: "beach" } as typeof trip, 1),
       /Only the trip owner/,
     );
     await assert.rejects(
@@ -219,11 +243,35 @@ test("trip storage is transactional, versioned, and limited to owners and member
       0,
     );
     await db.exec(`set request.jwt.claim.sub = '${owner}'`);
-    await save({ ...trip, members: [...trip.members, { id: stranger }] }, 5);
+    await save(
+      {
+        ...trip,
+        icon: "mountain",
+        members: [...trip.members, { id: stranger }],
+      } as typeof trip,
+      5,
+    );
+    assert.equal(
+      (
+        await db.query<{ result: { trips: { icon: string }[] } }>(
+          "select triply.get_workspace() as result",
+        )
+      ).rows[0].result.trips[0].icon,
+      "mountain",
+    );
     await db.exec(`set request.jwt.claim.sub = '${stranger}'`);
     assert.equal((await db.query("select * from triply.trips")).rows.length, 1);
     await db.exec(`set request.jwt.claim.sub = '${owner}'`);
     await save(trip, 6);
+    assert.equal(
+      (await db.query<{ icon: string }>("select icon from triply.trips"))
+        .rows[0].icon,
+      "mountain",
+    );
+    await assert.rejects(
+      save({ ...trip, icon: "invalid" } as typeof trip, 7),
+      /check constraint/,
+    );
     await db.exec(`set request.jwt.claim.sub = '${stranger}'`);
     assert.equal((await db.query("select * from triply.trips")).rows.length, 0);
     await db.exec("reset role; set role anon");

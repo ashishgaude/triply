@@ -1,5 +1,21 @@
 export type Member = { id: string; name: string };
 export type RegisteredUser = { id: string; display_name: string };
+export const tripIconIds = [
+  "plane",
+  "car",
+  "train",
+  "beach",
+  "mountain",
+  "camping",
+  "city",
+  "boat",
+] as const;
+export type TripIconId = (typeof tripIconIds)[number];
+export function normalizeTripIcon(value: unknown): TripIconId {
+  return tripIconIds.includes(value as TripIconId)
+    ? (value as TripIconId)
+    : "plane";
+}
 
 export function membersFromUsers(
   users: RegisteredUser[],
@@ -30,6 +46,7 @@ export type Trip = {
   ownerId?: string;
   version?: number;
   name: string;
+  icon?: TripIconId;
   destination: string;
   currency: string;
   sample: boolean;

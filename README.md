@@ -75,6 +75,9 @@ Run these migrations in the shared Supabase project's SQL editor, in order:
 
 1. [Traveler directory](supabase/migrations/2026-10-03-traveler-directory.sql)
 2. [Trips and expense storage](supabase/migrations/2026-10-03-trip-storage.sql)
+3. [Trip icons](supabase/migrations/2026-10-03-trip-icons.sql)
+
+For an existing installation, run the trip-icons migration after the previous two. It adds the icon column and updates the read/save functions without removing trip data. Trip owners choose an icon when creating or editing a trip; icons appear in the sidebar, selected-trip control, and heading. Existing trips default to Flight. Available icons are Flight, Road trip, Train, Beach, Mountains, Camping, City, and Boat.
 
 Both are rerunnable. All application tables and functions belong to `triply`; existing public-schema tables are untouched. Add `triply` to Supabase Data API's **Exposed schemas** without removing schemas used by the other project. Database administrator access is required to apply migrations; the public browser key cannot do this.
 

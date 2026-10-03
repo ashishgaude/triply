@@ -1,0 +1,99 @@
+.trip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal);
+  flex-shrink: 0;
+}
+.trip-icon-picker {
+  min-width: 0;
+}
+.trip-icon-options {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 7px;
+}
+.modal-form .trip-icon-options label {
+  display: grid;
+  place-items: center;
+  position: relative;
+  aspect-ratio: 1;
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  color: #7d8d73;
+  background: #fff;
+}
+.trip-icon-options input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.modal-form .trip-icon-options label.chosen {
+  background: #eaf4ef;
+  border-color: var(--teal);
+  color: var(--teal);
+}
+.trip-icon-options label:has(input:focus-visible) {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+.trip-icon-options label:hover {
+  background: #f0f5ed;
+}
+.trip-icon-picker:disabled label {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.trip-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.trip-heading > .trip-icon {
+  width: 42px;
+  height: 42px;
+  background: #eaf4ef;
+  border: 1px solid #dce9dd;
+  border-radius: 7px;
+  margin-top: 1px;
+}
+.trip-heading h1 {
+  min-width: 0;
+}
+.trip-list .sidebar-trip > .trip-icon {
+  width: 19px;
+}
+.trip-selector {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.trip-selector > select {
+  min-width: 0;
+  flex: 1;
+}
+@media (max-width: 450px) {
+  .trip-icon-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .modal-form .trip-icon-options label {
+    aspect-ratio: auto;
+    min-height: 42px;
+  }
+  .trip-heading {
+    gap: 9px;
+  }
+  .trip-heading > .trip-icon {
+    width: 35px;
+    height: 35px;
+  }
+  .trip-heading > .trip-icon svg {
+    width: 21px;
+  }
+}
